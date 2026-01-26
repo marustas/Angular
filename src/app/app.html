@@ -1,5 +1,6 @@
 <div class="content">
   <app-pagination>
+    <input type="text" (input)="handleChange($event)" />
     @if (isLoading()) {
       <p>Loading...</p>
     } @else {

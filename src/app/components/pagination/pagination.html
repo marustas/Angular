@@ -2,5 +2,5 @@
   <ng-content></ng-content>
   <h2>{{ pageCount() }}</h2>
   <button [disabled]="pageCount() === 1" (click)="decrement()">Previous</button>
-  <button [disabled]="pageCount() === 10" (click)="increment()">Next</button>
+  <button (click)="increment()">Next</button>
 </div>

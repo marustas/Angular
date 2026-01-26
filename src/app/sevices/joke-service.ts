@@ -2,11 +2,15 @@ import { inject, Injectable, signal } from '@angular/core';
 import {
   BehaviorSubject,
   catchError,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
   finalize,
   map,
   Observable,
   of,
   shareReplay,
+  startWith,
   switchMap,
 } from 'rxjs';
 import { Joke, JokeResponse } from '../types/types';
@@ -22,11 +26,16 @@ export class JokeService {
   private apiUrl = inject(API_URL);
 
   private pageSubject = new BehaviorSubject<number>(1);
+  private searchTermSubject = new BehaviorSubject<string>('');
 
-  public jokes$ = this.pageSubject.pipe(
-    switchMap((page) => this.getJokes(page)),
+  public jokes$ = combineLatest([
+    this.pageSubject,
+    this.searchTermSubject.pipe(debounceTime(300), distinctUntilChanged(), startWith('')),
+  ]).pipe(
+    switchMap(([page, searchTerm]) => this.getJokes(page, searchTerm)),
     shareReplay(1),
   );
+
   public isLoading = signal(false);
   public readonly pageCount = toSignal(this.pageSubject, { initialValue: 1 });
 
@@ -34,7 +43,11 @@ export class JokeService {
     this.pageSubject.next(page);
   }
 
-  getJokes(pageToFetch?: number): Observable<Joke[]> {
+  setSearchTerm(term: string) {
+    this.searchTermSubject.next(term);
+  }
+
+  getJokes(pageToFetch?: number, searchTerm?: string): Observable<Joke[]> {
     this.isLoading.set(true);
 
     return this.httpClient
@@ -42,13 +55,14 @@ export class JokeService {
         headers: { Accept: 'application/json' },
         params: {
           page: pageToFetch ?? 1,
+          ...(searchTerm ? { term: searchTerm } : {}),
         },
       })
       .pipe(
         map((response) => response.results),
         catchError((error) => {
           console.error('Error fetching jokes:', error);
-          return of([]);
+          return of<Joke[]>([]);
         }),
         finalize(() => this.isLoading.set(false)),
       );
