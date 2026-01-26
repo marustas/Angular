@@ -4,7 +4,7 @@
     @if (isLoading()) {
       <p>Loading...</p>
     } @else {
-      <app-jokes-list [jokes]="(jokes$ | async) || []"></app-jokes-list>
+      <app-jokes-list [jokes]="(jokeResponse$ | async | extractUsers) || []" />
     }
   </app-pagination>
 </div>

@@ -1,5 +1,9 @@
-<ol>
-  @for (joke of jokes(); track joke.id) {
-    <app-joke-list-item [joke]="joke" />
-  }
-</ol>
+@if (jokes().length === 0) {
+  <p>No jokes found.</p>
+} @else {
+  <ol>
+    @for (joke of jokes(); track joke.id) {
+      <app-joke-list-item [joke]="joke" />
+    }
+  </ol>
+}

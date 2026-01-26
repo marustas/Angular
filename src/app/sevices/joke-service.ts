@@ -6,14 +6,12 @@ import {
   debounceTime,
   distinctUntilChanged,
   finalize,
-  map,
   Observable,
   of,
   shareReplay,
-  startWith,
   switchMap,
 } from 'rxjs';
-import { Joke, JokeResponse } from '../types/types';
+import { emptyJokeResponse, JokeResponse } from '../types/types';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { API_URL } from './apiUrl';
@@ -28,9 +26,9 @@ export class JokeService {
   private pageSubject = new BehaviorSubject<number>(1);
   private searchTermSubject = new BehaviorSubject<string>('');
 
-  public jokes$ = combineLatest([
+  public jokeResponse$ = combineLatest([
     this.pageSubject,
-    this.searchTermSubject.pipe(debounceTime(300), distinctUntilChanged(), startWith('')),
+    this.searchTermSubject.pipe(debounceTime(300), distinctUntilChanged()),
   ]).pipe(
     switchMap(([page, searchTerm]) => this.getJokes(page, searchTerm)),
     shareReplay(1),
@@ -47,7 +45,7 @@ export class JokeService {
     this.searchTermSubject.next(term);
   }
 
-  getJokes(pageToFetch?: number, searchTerm?: string): Observable<Joke[]> {
+  getJokes(pageToFetch?: number, searchTerm?: string): Observable<JokeResponse> {
     this.isLoading.set(true);
 
     return this.httpClient
@@ -59,10 +57,9 @@ export class JokeService {
         },
       })
       .pipe(
-        map((response) => response.results),
         catchError((error) => {
           console.error('Error fetching jokes:', error);
-          return of<Joke[]>([]);
+          return of<JokeResponse>(emptyJokeResponse);
         }),
         finalize(() => this.isLoading.set(false)),
       );
