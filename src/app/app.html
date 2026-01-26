@@ -1,15 +1,9 @@
-<mat-toolbar color="primary"> My Weather App </mat-toolbar>
 <div class="content">
-  <mat-form-field>
-    <mat-label>Select city</mat-label>
-    <mat-select [formControl]="cityControl">
-      @for (city of cities; track $index) {
-        <mat-option [value]="city">
-          {{ city }}
-        </mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-  <br />
-  <router-outlet></router-outlet>
+  <app-pagination>
+    @if (isLoading()) {
+      <p>Loading...</p>
+    } @else {
+      <app-jokes-list [jokes]="(jokes$ | async) || []"></app-jokes-list>
+    }
+  </app-pagination>
 </div>
