@@ -50,7 +50,6 @@ export class JokeService {
 
     return this.httpClient
       .get<JokeResponse>(this.apiUrl, {
-        headers: { Accept: 'application/json' },
         params: {
           page: pageToFetch ?? 1,
           ...(searchTerm ? { term: searchTerm } : {}),
